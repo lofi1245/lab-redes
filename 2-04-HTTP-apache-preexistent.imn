@@ -1,0 +1,173 @@
+node n1 {
+    type router
+    model host
+    network-config {
+	hostname n1Host
+	!
+	interface eth1
+	 ip address 192.0.3.10/24
+	 ipv6 address 2001:db8:0::10/64
+	!
+    }
+    canvas c1
+    iconcoords {236.0 271.0}
+    labelcoords {236.0 303.0}
+    services {DefaultRoute UserDefined}
+    custom-config {
+	custom-config-id service:UserDefined
+	custom-command UserDefined
+	config {
+	dirs=('/var/log/apache2', '/run/lock', '/etc/apache2/ports', '/etc/apache2/sites-available', )
+	files=('/etc/apache2/ports/ports.conf', '/etc/apache2/sites-available/default', 'diegogomesdesantana.html', )
+	cmdup=('python -m SimpleHTTPServer 80', )
+	cmddown=('/etc/init.d/apache2 stop', )
+	}
+    }
+    custom-config {
+	custom-config-id service:UserDefined:diegogomesdesantana.html
+	custom-command diegogomesdesantana.html
+	config {
+	<!DOCTYPE HTML>
+	<head>
+	</head>
+	<body>
+		VIDEOS30
+		Site para Upload de videos de até 30 segundos
+	</body>
+	}
+    }
+    custom-config {
+	custom-config-id service:UserDefined:/etc/apache2/sites-available/default
+	custom-command /etc/apache2/sites-available/default
+	config {
+	<VirtualHost 192.0.2.10:80>
+		ServerAdmin webmaster@localhost
+	
+		DocumentRoot /var/www
+		<Directory />
+			Options FollowSymLinks
+			AllowOverride None
+		</Directory>
+		<Directory /var/www/>
+			Options Indexes FollowSymLinks MultiViews
+			AllowOverride None
+			Order allow,deny
+			allow from all
+		</Directory>
+	
+		ScriptAlias /cgi-bin/ /usr/lib/cgi-bin/
+		<Directory "/usr/lib/cgi-bin">
+			AllowOverride None
+			Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
+			Order allow,deny
+			Allow from all
+		</Directory>
+	
+		ErrorLog ${APACHE_LOG_DIR}/error.log
+	
+		# Possible values include: debug, info, notice, warn, error, crit,
+		# alert, emerg.
+		LogLevel warn
+	
+		CustomLog ${APACHE_LOG_DIR}/access.log combined
+	
+	    Alias /doc/ "/usr/share/doc/"
+	    <Directory "/usr/share/doc/">
+	        Options Indexes MultiViews FollowSymLinks
+	        AllowOverride None
+	        Order deny,allow
+	        Deny from all
+	        Allow from 127.0.0.0/255.0.0.0 ::1/128
+	    </Directory>
+	
+	</VirtualHost>
+	}
+    }
+    custom-config {
+	custom-config-id service:UserDefined:/etc/apache2/ports/ports.conf
+	custom-command /etc/apache2/ports/ports.conf
+	config {
+	<!DOCTYPE HTML>
+	<html>
+	<head>
+	</head>
+	<body>
+		VIDEOS30
+		Site para Upload de videos de até 30 segundos
+	</body>
+	</html>
+	}
+    }
+    interface-peer {eth1 n3}
+}
+
+node n2 {
+    type router
+    model PC
+    network-config {
+	hostname n2Client
+	!
+	interface eth1
+	 ip address 192.0.4.20/24
+	 ipv6 address 2001:db8:1::20/64
+	!
+    }
+    canvas c1
+    iconcoords {552.0 270.0}
+    labelcoords {552.0 302.0}
+    services {DefaultRoute}
+    interface-peer {eth1 n3}
+}
+
+node n3 {
+    type router
+    model router
+    network-config {
+	hostname n3
+	!
+	interface eth1
+	 ip address 192.0.4.1/24
+	 ipv6 address 2001:db8:1::1/64
+	!
+	interface eth0
+	 ip address 192.0.3.1/24
+	 ipv6 address 2001:db8:0::1/64
+	!
+    }
+    canvas c1
+    iconcoords {390.0 356.0}
+    labelcoords {390.0 388.0}
+    interface-peer {eth0 n1}
+    interface-peer {eth1 n2}
+}
+
+link l2 {
+    nodes {n1 n3}
+    bandwidth 0
+}
+
+link l3 {
+    nodes {n3 n2}
+    bandwidth 0
+}
+
+canvas c1 {
+    name {Canvas1}
+}
+
+option global {
+    interface_names no
+    ip_addresses yes
+    ipv6_addresses yes
+    node_labels yes
+    link_labels yes
+    show_api no
+    background_images no
+    annotations yes
+    grid no
+    traffic_start 0
+}
+
+option session {
+}
+
